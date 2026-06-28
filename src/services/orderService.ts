@@ -35,12 +35,12 @@ function mapRowToOrderItem(row: OrderItemRow): OrderItem {
 function getOrderItems(orderId: number): OrderItem[] {
   const rows = db
     .prepare("SELECT * FROM order_items WHERE order_id = ?")
-    .all(orderId) as OrderItemRow[];
+    .all(orderId) as unknown as OrderItemRow[];
   return rows.map(mapRowToOrderItem);
 }
 
 export function getOrderById(id: number): Order | null {
-  const row = db.prepare("SELECT * FROM orders WHERE id = ?").get(id) as OrderRow | undefined;
+  const row = db.prepare("SELECT * FROM orders WHERE id = ?").get(id) as unknown as OrderRow | undefined;
   if (!row) return null;
   return mapRowToOrder(row, getOrderItems(id));
 }
@@ -48,7 +48,7 @@ export function getOrderById(id: number): Order | null {
 export function getOrdersByCustomer(customerId: number): Order[] {
   const rows = db
     .prepare("SELECT * FROM orders WHERE customer_id = ? ORDER BY created_at DESC")
-    .all(customerId) as OrderRow[];
+    .all(customerId) as unknown as OrderRow[];
   return rows.map((row) => mapRowToOrder(row, getOrderItems(row.id)));
 }
 

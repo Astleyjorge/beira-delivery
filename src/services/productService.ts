@@ -18,12 +18,12 @@ function mapRowToProduct(row: ProductRow): Product {
 export function getProductsByVendor(vendorId: number): Product[] {
   const rows = db
     .prepare("SELECT * FROM products WHERE vendor_id = ? ORDER BY created_at DESC")
-    .all(vendorId) as ProductRow[];
+    .all(vendorId) as unknown as ProductRow[];
   return rows.map(mapRowToProduct);
 }
 
 export function getProductById(id: number): Product | null {
-  const row = db.prepare("SELECT * FROM products WHERE id = ?").get(id) as ProductRow | undefined;
+  const row = db.prepare("SELECT * FROM products WHERE id = ?").get(id) as unknown as ProductRow | undefined;
   return row ? mapRowToProduct(row) : null;
 }
 

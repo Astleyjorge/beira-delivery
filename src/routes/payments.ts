@@ -10,10 +10,16 @@ import {
 } from "../services/paymentService";
 import { getOrderById } from "../services/orderService";
 import { FakePaymentProvider } from "../services/payments/FakePaymentProvider";
+import { MpesaPaymentProvider } from "../services/payments/MpesaPaymentProvider";
 import type { IPaymentProvider } from "../services/payments/IPaymentProvider";
 
 export const paymentsRouter = Router();
 
+// ─── Switch providers here ────────────────────────────────────────────────
+// To use the real M-Pesa API (once you have the Public Key from the portal):
+//   const provider: IPaymentProvider = MpesaPaymentProvider.fromEnv();
+// To keep using the fake provider for local development:
+//   const provider: IPaymentProvider = new FakePaymentProvider();
 const provider: IPaymentProvider = new FakePaymentProvider();
 
 const initiatePaymentSchema = z.object({

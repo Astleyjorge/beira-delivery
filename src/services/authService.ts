@@ -47,7 +47,7 @@ export async function register(input: RegisterInput): Promise<AuthResponse> {
   // instead of a raw SQLite constraint error.
   const existingPhone = db
     .prepare("SELECT id FROM users WHERE phone = ?")
-    .get(input.phone) as { id: number } | undefined;
+    .get(input.phone) as unknown as { id: number } | undefined;
 
   if (existingPhone) {
     throw new UserAlreadyExistsError(`Phone number ${input.phone} is already registered`);
@@ -56,7 +56,7 @@ export async function register(input: RegisterInput): Promise<AuthResponse> {
   if (input.email) {
     const existingEmail = db
       .prepare("SELECT id FROM users WHERE email = ?")
-      .get(input.email) as { id: number } | undefined;
+      .get(input.email) as unknown as { id: number } | undefined;
 
     if (existingEmail) {
       throw new UserAlreadyExistsError(`Email ${input.email} is already registered`);
@@ -77,7 +77,7 @@ export async function register(input: RegisterInput): Promise<AuthResponse> {
 
   const newUser = db
     .prepare("SELECT * FROM users WHERE id = ?")
-    .get(Number(result.lastInsertRowid)) as UserRow;
+    .get(Number(result.lastInsertRowid)) as unknown as UserRow;
 
   const user = mapRowToUser(newUser);
   const token = signToken({ userId: user.id, role: user.role });

@@ -18,13 +18,13 @@ function mapRowToVendor(row: VendorRow): Vendor {
 
 export function getAllVendors(): Vendor[] {
   // .prepare() compiles the SQL once; .all() runs it and returns every matching row.
-  const rows = db.prepare("SELECT * FROM vendors ORDER BY created_at DESC").all() as VendorRow[];
+  const rows = db.prepare("SELECT * FROM vendors ORDER BY created_at DESC").all() as unknown as VendorRow[];
   return rows.map(mapRowToVendor);
 }
 
 export function getVendorById(id: number): Vendor | null {
   // .get() returns a single row, or undefined if nothing matched.
-  const row = db.prepare("SELECT * FROM vendors WHERE id = ?").get(id) as VendorRow | undefined;
+  const row = db.prepare("SELECT * FROM vendors WHERE id = ?").get(id) as unknown as VendorRow | undefined;
   return row ? mapRowToVendor(row) : null;
 }
 

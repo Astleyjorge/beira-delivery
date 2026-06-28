@@ -18,14 +18,14 @@ function mapRowToPayment(row: PaymentRow): Payment {
 }
 
 export function getPaymentById(id: number): Payment | null {
-  const row = db.prepare("SELECT * FROM payments WHERE id = ?").get(id) as PaymentRow | undefined;
+  const row = db.prepare("SELECT * FROM payments WHERE id = ?").get(id) as unknown as PaymentRow | undefined;
   return row ? mapRowToPayment(row) : null;
 }
 
 export function getPaymentsByOrder(orderId: number): Payment[] {
   const rows = db
     .prepare("SELECT * FROM payments WHERE order_id = ? ORDER BY created_at DESC")
-    .all(orderId) as PaymentRow[];
+    .all(orderId) as unknown as PaymentRow[];
   return rows.map(mapRowToPayment);
 }
 
