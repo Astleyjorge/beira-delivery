@@ -5,6 +5,8 @@ import { productsRouter } from "./routes/products";
 import { ordersRouter } from "./routes/orders";
 import { paymentsRouter } from "./routes/payments";
 import { authRouter } from "./routes/auth";
+import { ridersRouter } from "./routes/riders";
+import { bikesRouter } from "./routes/bikes";
 
 import { authenticate } from "./middleware/auth";
 
@@ -34,6 +36,8 @@ app.use("/api/vendors/:vendorId/products", productsRouter);
 // If the token is missing or invalid, authenticate sends a 401 and the handler never runs.
 app.use("/api/orders", authenticate, ordersRouter);
 app.use("/api/payments", authenticate, paymentsRouter);
+app.use("/api/riders", authenticate, ridersRouter);
+app.use("/api/bikes", authenticate, bikesRouter);
 
 // 404 handler — runs if no route above matched
 app.use((req: Request, res: Response) => {

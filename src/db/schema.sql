@@ -91,3 +91,54 @@ CREATE INDEX IF NOT EXISTS idx_orders_rider ON orders(rider_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_products_vendor ON products(vendor_id);
 CREATE INDEX IF NOT EXISTS idx_payments_order ON payments(order_id);
+
+-- Bikes: physical delivery vehicles owned by the company (fleet model).
+-- Each bike can be assigned to at most one rider (enforced via UNIQUE on riders.bike_id).
+CREATE TABLE IF NOT EXISTS bikes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  plate TEXT NOT NULL UNIQUE,        -- license plate / asset identifier
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN (
+    'active',       -- in service, can be assigned
+    'maintenance',  -- temporarily out for repair
+    'retired'       -- permanently removed from fleet
+  )),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Riders: extends users with role='rider' with delivery-specific fields.
+-- Follows the same pattern as vendors (vendor_owner user → vendors row).
+CREATE TABLE IF NOT EXISTS riders (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL UNIQUE REFERENCES users(id),
+  is_approved INTEGER NOT NULL DEFAULT 0 CHECK (is_approved IN (0, 1)), -- admin must approve before riding
+  is_available INTEGER NOT NULL DEFAULT 0 CHECK (is_available IN (0, 1)), -- offline by default
+  bike_id INTEGER UNIQUE REFERENCES bikes(id), -- nullable + UNIQUE: at most one rider per bike
+  current_latitude REAL,
+  current_longitude REAL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Rider assignments: tracks every offer made to a rider for a specific order.
+-- Separate from order status so we have a full audit trail:
+-- one order can be offered to multiple riders before one accepts.
+CREATE TABLE IF NOT EXISTS rider_assignments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  order_id INTEGER NOT NULL REFERENCES orders(id),
+  rider_id INTEGER NOT NULL REFERENCES users(id),
+  status TEXT NOT NULL DEFAULT 'offered' CHECK (status IN (
+    'offered',   -- admin offered this order to the rider
+    'accepted',  -- rider accepted, becomes the assigned rider
+    'rejected'   -- rider declined, admin can offer to someone else
+  )),
+  offered_at TEXT NOT NULL DEFAULT (datetime('now')),
+  responded_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_riders_user ON riders(user_id);
+CREATE INDEX IF NOT EXISTS idx_riders_available ON riders(is_available);
+CREATE INDEX IF NOT EXISTS idx_bikes_status ON bikes(status);
+CREATE INDEX IF NOT EXISTS idx_assignments_order ON rider_assignments(order_id);
+CREATE INDEX IF NOT EXISTS idx_assignments_rider ON rider_assignments(rider_id);
+CREATE INDEX IF NOT EXISTS idx_assignments_status ON rider_assignments(status);
